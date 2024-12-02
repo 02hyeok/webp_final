@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const router = useRouter();
+  const { setUser } = useUser();
 
   const handleLogin = async () => {
     const res = await fetch('/api/auth/login', {
@@ -19,7 +20,12 @@ export default function LoginPage() {
 
     const data = await res.json();
     if (res.ok) {
-      router.push(`/?userId=${data.userId}&userEmail=${encodeURIComponent(data.userEmail)}`);
+      setUser({ 
+        userId: data.userId, 
+        userEmail: data.userEmail,
+        profileImage: data.profileImage,
+      });
+      router.push('/');
     } else {
       setMessage(data.error || 'Login failed');
     }

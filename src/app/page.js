@@ -4,28 +4,28 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import Page from '../components/Page';
+import { useUser } from '@/context/UserContext';
 
 export default function Home() {
   const [pages, setPages] = useState([]);
   const searchParams = useSearchParams();
-  const userId = searchParams.get('userId');
-  const userEmail = searchParams.get('userEmail');
+  const { user } = useUser();
   const [selectedPageIndex, setSelectedPageIndex] = useState(null);
 
   useEffect(() => {
-    if (userId) {
-      fetch(`/api/pages?userId=${userId}`)
+    if (user?.userId) {
+      fetch(`/api/pages?userId=${user.userId}`)
         .then((res) => res.json())
         .then((data) => setPages(data))
         .catch((error) => console.error('Error fetching pages:', error));
     }
-  }, [userId]);
+  }, [user?.userId]);
 
   const addNewPage = async () => {
     const newPage = { 
       title: `New Page ${pages.length + 1}`, 
       content: '', 
-      userId: parseInt(userId, 10),
+      userId: parseInt(user?.userId, 10),
     };
 
     const res = await fetch('/api/pages', {
@@ -100,7 +100,7 @@ export default function Home() {
   return (
     <div className="flex">
       <Sidebar
-        userEmail={userEmail}
+        userEmail={user?.userEmail}
         pages={pages}
         selectedPageIndex={selectedPageIndex}
         setSelectedPageIndex={setSelectedPageIndex}
