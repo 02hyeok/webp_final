@@ -3,7 +3,14 @@
 import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
 
-export default function Sidebar({ pages, selectedPageIndex, setSelectedPageIndex, addNewPage, deletePage }) {
+export default function Sidebar({ 
+  pages,  
+  selectedPageIndex, 
+  setSelectedPageIndex, 
+  toggleFavorite,
+  addNewPage, 
+  deletePage 
+}) {
   const { user } = useUser();
   const router = useRouter();
 
@@ -46,34 +53,61 @@ export default function Sidebar({ pages, selectedPageIndex, setSelectedPageIndex
         {pages.map((page, index) => (
           <div
             key={page.id}
-            className={`group flex items-center justify-between px-1 py-2 rounded-md ${
+            className={`group flex items-center px-1 py-2 rounded-md ${
               selectedPageIndex === index ? 'bg-gray-200' : 'hover:bg-gray-200'
             }`}
             onClick={() => setSelectedPageIndex(index)}
           >
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 fill-gray-600" viewBox="-2 -2 20 20">
-                <path d="M4.35645 15.4678H..."></path>
-              </svg>
+            <div className="w-5 flex justify-center items-center">
+              <button
+                className={`${
+                  page.isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                } text-gray-500 hover:text-yellow-500 focus:outline-none transition-opacity`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(page.id, !page.isFavorite);
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-5 w-5 ${
+                    page.isFavorite ? 'fill-yellow-500' : 'fill-none'
+                  }`}
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.518 4.674a1 1 0 00.95.69h4.908c.969 0 1.371 1.24.588 1.81l-3.977 2.89a1 1 0 00-.364 1.118l1.518 4.674c.3.921-.755 1.688-1.54 1.118l-3.977-2.89a1 1 0 00-1.175 0l-3.977 2.89c-.785.57-1.84-.197-1.54-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.87 9.1c-.783-.57-.38-1.81.588-1.81h4.908a1 1 0 00.95-.69l1.518-4.674z"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex-grow ml-2">
               <span className="text-sm font-bold text-gray-600">{page.title}</span>
             </div>
 
-            <button
-              className="hidden group-hover:block text-gray-500 hover:text-red-500 focus:outline-none"
-              onClick={(e) => {
-                e.stopPropagation();
-                deletePage(page.id); 
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="currentColor"
-                viewBox="0 0 24 24"
+            <div className="w-5 flex justify-center items-center">
+              <button
+                className="opacity-0 group-hover:opacity-100  text-gray-500 hover:text-red-500 focus:outline-none transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deletePage(page.id); 
+                }}
               >
-                <path d="M3 6h18v2H3V6zm2 3v10a2 2 0 002 2h10a2 2 0 002-2V9H5zm5 2h2v8h-2v-8zm4 0h2v8h-2v-8zM9 3h6v2H9V3z" />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M3 6h18v2H3V6zm2 3v10a2 2 0 002 2h10a2 2 0 002-2V9H5zm5 2h2v8h-2v-8zm4 0h2v8h-2v-8zM9 3h6v2H9V3z" />
+                </svg>
+              </button>
+            </div>
           </div>
         ))}
       </div>

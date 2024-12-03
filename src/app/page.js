@@ -1,14 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import Page from '../components/Page';
 import { useUser } from '@/context/UserContext';
 
 export default function Home() {
   const [pages, setPages] = useState([]);
-  const searchParams = useSearchParams();
   const { user } = useUser();
   const [selectedPageIndex, setSelectedPageIndex] = useState(null);
 
@@ -20,6 +18,30 @@ export default function Home() {
         .catch((error) => console.error('Error fetching pages:', error));
     }
   }, [user?.userId]);
+
+  const toggleFavorite = async (pageId, isFavorite) => {
+    const res = await fetch('/api/pages/favorite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pageId, isFavorite }),
+    });
+
+    if (!res.ok) {
+      console.error('Failed to toggle favorite status');
+      return;
+    }
+
+    const updatedPage = await res.json();
+
+    // 페이지 목록 업데이트
+    setPages((prevPages) => {
+      const updatedPages = prevPages.map((page) =>
+        page.id === pageId ? updatedPage : page
+      );
+
+      return updatedPages.sort((a, b) => b.isFavorite - a.isFavorite || a.id - b.id);
+    });
+  };
 
   const addNewPage = async () => {
     const newPage = { 
@@ -104,6 +126,7 @@ export default function Home() {
         pages={pages}
         selectedPageIndex={selectedPageIndex}
         setSelectedPageIndex={setSelectedPageIndex}
+        toggleFavorite={toggleFavorite}
         addNewPage={addNewPage}
         deletePage={deletePage}
       />
