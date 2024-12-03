@@ -16,13 +16,21 @@ export async function POST(request) {
       );
     }
 
-    return NextResponse.json({ 
-      message: 'Login successful', 
+    const response = NextResponse.json({
       userId: user.id, 
       userEmail: user.email,
       profileImage: user.profileImage,
-    }, { status: 200 }
-    );
+    });
+
+    response.cookies.set('userId', user.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24,
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

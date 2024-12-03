@@ -1,19 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/context/UserContext';
 
 export default function ProfilePage() {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState('');
-  const { user } = useUser();
+  const [user, setUser] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const res = await fetch('/api/auth/me', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        const user = await res.json();
+        setUser(user);
+      } else {
+        router.push('/login');
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
-
+  
   const handleUpload = async () => {
     if (!file) {
       setMessage('Please select a file');
@@ -25,9 +42,7 @@ export default function ProfilePage() {
 
     const res = await fetch('/api/profile/upload', {
       method: 'POST',
-      headers: {
-        'user-id': user?.userId,
-      },
+      credentials: 'include',
       body: formData,
     });
 

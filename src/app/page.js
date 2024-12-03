@@ -1,23 +1,40 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import Page from '../components/Page';
-import { useUser } from '@/context/UserContext';
 
 export default function Home() {
   const [pages, setPages] = useState([]);
-  const { user } = useUser();
+  const [user, setUser] = useState(null);
+  const router = useRouter();
   const [selectedPageIndex, setSelectedPageIndex] = useState(null);
 
   useEffect(() => {
-    if (user?.userId) {
-      fetch(`/api/pages?userId=${user.userId}`)
-        .then((res) => res.json())
-        .then((data) => setPages(data))
-        .catch((error) => console.error('Error fetching pages:', error));
-    }
-  }, [user?.userId]);
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('/api/auth/me', {
+          method: 'GET',
+          credentials: 'include', 
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+          fetchPages(data.id);
+        } else {
+          console.error('Failed to fetch user info:', await res.text());
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+        router.push('/login');
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const toggleFavorite = async (pageId, isFavorite) => {
     const res = await fetch('/api/pages/favorite', {
@@ -41,6 +58,20 @@ export default function Home() {
 
       return updatedPages.sort((a, b) => b.isFavorite - a.isFavorite || a.id - b.id);
     });
+  };
+
+  const fetchPages = async (userId) => {
+    try {
+      const res = await fetch(`/api/pages?userId=${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPages(data);
+      } else {
+        console.error('Failed to fetch pages:', await res.text());
+      }
+    } catch (error) {
+      console.error('Error fetching pages:', error);
+    }
   };
 
   const addNewPage = async () => {
@@ -93,11 +124,7 @@ export default function Home() {
     await fetch('/api/pages', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: updatedPage.id, 
-        title: updatedPage.title,
-        content: updatedPage.content,
-      }),
+      body: JSON.stringify(updatedPage),
     });
   };
 
@@ -111,18 +138,14 @@ export default function Home() {
     await fetch('/api/pages', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: updatedPage.id,
-        title: updatedPage.title,
-        content: updatedPage.content,
-      }),
+      body: JSON.stringify(updatedPage),
     });
   };
 
   return (
     <div className="flex">
       <Sidebar
-        userEmail={user?.userEmail}
+        user={user}
         pages={pages}
         selectedPageIndex={selectedPageIndex}
         setSelectedPageIndex={setSelectedPageIndex}

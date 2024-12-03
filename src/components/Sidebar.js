@@ -1,9 +1,9 @@
 'use client';
 
-import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
 
 export default function Sidebar({ 
+  user,
   pages,  
   selectedPageIndex, 
   setSelectedPageIndex, 
@@ -11,14 +11,16 @@ export default function Sidebar({
   addNewPage, 
   deletePage 
 }) {
-  const { user } = useUser();
   const router = useRouter();
 
   return (
     <div className="w-1/4 min-w-20 max-w-60 h-screen bg-gray-100 fixed p-2">
       <div className="flex items-center gap-2 p-2">
         <img 
-          src={user?.profileImage || '/default-profile.jpg'}
+          src={
+            user?.profileImage ? 
+            user.profileImage : '/default-profile.jpg'
+          }
           alt="Profile" 
           className="w-6 h-6 rounded-md object-cover" 
         />
@@ -26,7 +28,7 @@ export default function Sidebar({
           className="flex-grow text-sm cursur-pointer"
           onClick={() => router.push('/profile')}
         >
-          {user?.userEmail || 'Guest'}의 Notion
+          {user?.email || 'Guest'}의 Notion
         </span>
         <svg className="w-6 h-6 fill-current hover:bg-gray-200" viewBox="0 0 24 24" onClick={addNewPage}>
           <path d="M9.944 14.721c.104.094.216.12.336.079l1.703-.688 6.844-6.844-1.406-1.398-6.836 6.836-.711 1.68c-.052.13-.029.242.07.335zm8.102-9.484l1.414 1.406.515-.523a.917.917 0 00.282-.633.76.76 0 00-.258-.61l-.25-.25a.702.702 0 00-.578-.187.975.975 0 00-.617.297l-.508.5zm-9.453.127a3.85 3.85 0 00-3.85 3.85v6.5a3.85 3.85 0 003.85 3.85h6.5a3.85 3.85 0 003.85-3.85V12.95a.85.85 0 10-1.7 0v2.764a2.15 2.15 0 01-2.15 2.15h-6.5a2.15 2.15 0 01-2.15-2.15v-6.5a2.15 2.15 0 012.15-2.15h3.395a.85.85 0 000-1.7H8.593z"></path>
