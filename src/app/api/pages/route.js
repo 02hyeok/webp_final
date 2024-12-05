@@ -26,13 +26,17 @@ export async function GET(request) {
 export async function POST(request) {
     try {
       const body = await request.json();
+      if (!body.title || !body.userId) {
+        throw new Error("Missing required fields");
+      }
 
       // 새 페이지 생성
       const newPage = await prisma.page.create({
         data: {
           title: body.title,
-          content: body.content,
+          content: body.content || "",
           userId: body.userId,
+          folderId: body.folderId || null,
         },
       });
 

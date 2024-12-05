@@ -9,7 +9,8 @@ export default function Home() {
   const [pages, setPages] = useState([]);
   const [user, setUser] = useState(null);
   const router = useRouter();
-  const [selectedPageIndex, setSelectedPageIndex] = useState(null);
+  const [selectedPageId, setSelectedPageId] = useState(null);
+  const [folders, setFolders] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -23,6 +24,7 @@ export default function Home() {
           const data = await res.json();
           setUser(data);
           fetchPages(data.id);
+          fetchFolder(data.id);
         } else {
           console.error('Failed to fetch user info:', await res.text());
           router.push('/login');
@@ -60,6 +62,66 @@ export default function Home() {
     });
   };
 
+  const fetchFolder = async (userId) => {
+    try {
+      const res = await fetch('/api/folders');
+      if (res.ok) {
+        const data = await res.json();
+        setFolders(data);
+      } else {
+        console.error('Failed to fetch folder:', await res.text());
+      }
+    } catch (error) {
+      console.error('Error fetching folder:', error);
+    }
+  };
+
+  const addFolder = async () => {
+    const folderName = prompt('Enter folder name:');
+    if (!folderName) return;
+
+    const res = await fetch('/api/folders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: folderName, userId: user.id }),
+    });
+
+    if (res.ok) {
+      const newFolder = await res.json();
+      setFolders([...folders, newFolder]);
+    }
+  };
+
+  const addPageToFolder = async (folderId) => {
+    const folderName = folders.find((folder) => folder.id === folderId)?.name || 'Folder';
+
+    const folderPagesCount = pages.filter((page) => page.folderId === folderId).length;
+
+    const newPage = {
+      title: `${folderName} New Page ${folderPagesCount + 1}`,
+      content: '',
+      userId: user.id,
+      folderId,
+    };
+
+    try {
+      const res = await fetch('/api/pages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPage),
+      });
+
+      if (res.ok) {
+        const newPage = await res.json();
+        setPages([...pages, newPage]);
+      } else {
+        console.error('Failed to create page in folder:', await res.text());
+      }
+    } catch (error) {
+      console.error('Error adding page to folder:', error);
+    }
+  };
+
   const fetchPages = async (userId) => {
     try {
       const res = await fetch(`/api/pages?userId=${userId}`);
@@ -78,7 +140,8 @@ export default function Home() {
     const newPage = { 
       title: `New Page ${pages.length + 1}`, 
       content: '', 
-      userId: parseInt(user?.userId, 10),
+      userId: parseInt(user?.id, 10),
+      folderId: null,
     };
 
     const res = await fetch('/api/pages', {
@@ -88,13 +151,13 @@ export default function Home() {
     });
 
     if (!res.ok) {
-      console.error('Failed to create new page');
+      console.error("Failed to create new page:", await res.text());
       return;
     }
 
     const createdPage = await res.json();
     setPages([...pages, createdPage]);
-    setSelectedPageIndex(pages.length);
+    setSelectedPageId(createdPage.id);
   };
 
   const deletePage = async (pageId) => {
@@ -109,17 +172,20 @@ export default function Home() {
   
     const remainingPages = pages.filter((page) => page.id !== pageId);
     setPages(remainingPages);
-    if (selectedPageIndex >= remainingPages.length) {
-      setSelectedPageIndex(null);
+    if (selectedPageId === pageId) {
+      setSelectedPageId(null);
     }
   };
 
   const handleTitleChange = async (e) => {
-    const updatedPages = [...pages];
-    const updatedPage = { ...updatedPages[selectedPageIndex], title: e.target.value };
-  
-    updatedPages[selectedPageIndex] = updatedPage;
+    const updatedPages = pages.map((page) =>
+      page.id === selectedPageId ? { ...page, title: e.target.value } : page
+    );
     setPages(updatedPages);
+
+    const updatedPage = updatedPages.find((page) => 
+      page.id === selectedPageId
+    );
   
     await fetch('/api/pages', {
       method: 'PUT',
@@ -129,11 +195,12 @@ export default function Home() {
   };
 
   const handleContentChange = async (e) => {
-    const updatedPages = [...pages];
-    const updatedPage = { ...updatedPages[selectedPageIndex], content: e.target.value };
-  
-    updatedPages[selectedPageIndex] = updatedPage;
+    const updatedPages = pages.map((page) =>
+      page.id === selectedPageId ? { ...page, content: e.target.value } : page
+    );
     setPages(updatedPages);
+
+    const updatedPage = updatedPages.find((page) => page.id === selectedPageId);
   
     await fetch('/api/pages', {
       method: 'PUT',
@@ -147,16 +214,19 @@ export default function Home() {
       <Sidebar
         user={user}
         pages={pages}
-        selectedPageIndex={selectedPageIndex}
-        setSelectedPageIndex={setSelectedPageIndex}
+        folders={folders}
+        selectedPageId={selectedPageId}
+        setSelectedPageId={setSelectedPageId}
         toggleFavorite={toggleFavorite}
         addNewPage={addNewPage}
         deletePage={deletePage}
+        addFolder={addFolder}
+        addPageToFolder={addPageToFolder}
       />
       <div className="ml-[35vw] mr-[15vw] p-5 transition-all">
-        {selectedPageIndex !== null && (
+        {selectedPageId !== null && (
           <Page
-            page={pages[selectedPageIndex]}
+            page={pages.find((page) => page.id === selectedPageId)}
             onTitleChange={(e) => handleTitleChange(e)}
             onContentChange={(e) => handleContentChange(e)}
           />

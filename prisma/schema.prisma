@@ -18,7 +18,17 @@ model User {
   email         String      @unique
   password      String
   pages         Page[]
+  folders       Folder[]
   profileImage  String?
+}
+
+model Folder {
+  id            Int         @id @default(autoincrement())
+  name          String
+  userId        Int
+  user          User        @relation(fields: [userId], references: [id])
+  pages         Page[]
+  createdAt     DateTime    @default(now())
 }
 
 model Page {
@@ -30,4 +40,6 @@ model Page {
   isFavorite    Boolean     @default(false)
   userId        Int
   author        User        @relation(fields: [userId], references: [id])
+  folderId      Int?
+  folder        Folder?     @relation(fields: [folderId], references: [id])
 }

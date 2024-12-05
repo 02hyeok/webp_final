@@ -27,8 +27,8 @@ export async function POST(request) {
     const filePath = path.join(uploadsDir, fileName);
 
     await fs.writeFile(filePath, buffer);
-
-    const userId = request.headers.get('user-id');
+    
+    const userId = request.cookies.get('userId')?.value;
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is missing' }, { status: 400 });
