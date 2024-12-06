@@ -62,11 +62,11 @@ export default function Sidebar({
         {folders.map((folder) => (
           <div 
             key={folder.id} 
-            className="group flex flex-col mt-4 mb-2"
+            className="flex flex-col mt-4 mb-2"
           >
             <div className="flex items-center justify-between">
-              <div className="text-xs font-bold text-gray-400 p-2 mt-4">{folder.name}</div>
-              <div className="p-2 mt-4">
+              <div className="text-xs font-bold text-gray-400 p-2">{folder.name}</div>
+              <div className="p-2 opacity-0 hover:opacity-100">
                 <svg 
                   className="w-6 h-6 fill-current hover:bg-gray-200" 
                   viewBox="0 0 24 24" 
@@ -87,7 +87,9 @@ export default function Sidebar({
                   >
                     <div className="w-5 flex justify-center items-center">
                       <button
-                        className={`${page.isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} text-gray-500 hover:text-yellow-500 focus:outline-none transition-opacity`}
+                        className={`${
+                          page.isFavorite ? 'opacity-100 text-yellow-500' : 'opacity-0 group-hover:opacity-100'
+                        } text-gray-500 hover:text-yellow-500 focus:outline-none transition-opacity`}
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleFavorite(page.id, !page.isFavorite);
@@ -150,7 +152,7 @@ export default function Sidebar({
                 <div className="w-5 flex justify-center items-center">
                   <button
                     className={`${
-                      page.isFavorite ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                      page.isFavorite ? 'opacity-100 text-yellow-500' : 'opacity-0 group-hover:opacity-100'
                     } text-gray-500 hover:text-yellow-500 focus:outline-none transition-opacity`}
                     onClick={(e) => {
                       e.stopPropagation();

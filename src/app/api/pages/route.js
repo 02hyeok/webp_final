@@ -12,9 +12,10 @@ export async function GET(request) {
     try {
       const pages = await prisma.page.findMany({
         where: { userId },
-        orderBy: {
-          createdAt: 'asc',
-        },
+        orderBy: [
+          { isFavorite: "desc" }, 
+          { createdAt: 'asc' },
+        ],
       });
       return new Response(JSON.stringify(pages), { status: 200 });
     } catch (error) {
