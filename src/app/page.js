@@ -1,16 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import Page from '../components/Page';
+import CommentsSidebar from '../components/CommentsSidebar';
 
 export default function Home() {
   const [pages, setPages] = useState([]);
   const [user, setUser] = useState(null);
   const router = useRouter();
   const [selectedPageId, setSelectedPageId] = useState(null);
+  const textareaRef = useRef(null);
   const [folders, setFolders] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -37,6 +42,14 @@ export default function Home() {
 
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (selectedPageId) {
+      fetchComments(selectedPageId, true);
+    } else {
+      setShowComments(false);
+    }
+  }, [selectedPageId]);
 
   const toggleFavorite = async (pageId, isFavorite) => {
     const res = await fetch('/api/pages/favorite', {
@@ -194,6 +207,14 @@ export default function Home() {
     });
   };
 
+  const adjustTextareaHeight = (element) => {
+    if (element) {
+      const padding = 12;
+      element.style.height = 'auto';
+      element.style.height = `${padding + element.scrollHeight}px`; 
+    }
+  };
+
   const handleContentChange = async (e) => {
     const updatedPages = pages.map((page) =>
       page.id === selectedPageId ? { ...page, content: e.target.value } : page
@@ -207,6 +228,70 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedPage),
     });
+
+    if (textareaRef.current) {
+      adjustTextareaHeight(textareaRef.current);
+    }
+  };
+
+  const toggleComments = () => {
+    setShowComments(!showComments);
+    if (!showComments && selectedPageId) {
+      fetchComments(selectedPageId);
+    }
+  };
+
+  const fetchComments = async (pageId, autoOpen = false) => {
+    try {
+      const res = await fetch(`/api/comments?pageId=${pageId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data);
+        if (autoOpen) {
+          setShowComments(data.length > 0);
+        }
+      } else {
+        console.error('Failed to fetch comments:', await res.text());
+        setShowComments(false);
+      }
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      setShowComments(false);
+    }
+  };
+
+  const addComment = async (commentContent) => {
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: commentContent, pageId: selectedPageId, userId: user.id }),
+      });
+
+      if (res.ok) {
+        const newCommentData = await res.json();
+        setComments([newCommentData, ...comments]);
+        setNewComment('');
+        setShowComments(true);
+      } else {
+        console.error('Failed to add comment:', await res.text());
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
+
+  const deleteComment = async (commentId) => {
+    try {
+      const res = await fetch(`/api/comments/${commentId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setComments(comments.filter((comment) => comment.id !== commentId));
+      } else {
+        console.error('Failed to delete comment:', await res.text());
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
   };
 
   return (
@@ -223,15 +308,27 @@ export default function Home() {
         addFolder={addFolder}
         addPageToFolder={addPageToFolder}
       />
-      <div className="ml-[35vw] mr-[15vw] p-5 transition-all">
+      <div className="flex-grow p-5 transition-all ml-[30vw] mr-[30vw]">
         {selectedPageId !== null && (
           <Page
             page={pages.find((page) => page.id === selectedPageId)}
             onTitleChange={(e) => handleTitleChange(e)}
             onContentChange={(e) => handleContentChange(e)}
+            textareaRef={textareaRef}
           />
         )}
       </div>
+      <CommentsSidebar
+        selectedPageId={selectedPageId}
+        toggleComments={toggleComments}
+        comments={comments}
+        newComment={newComment}
+        setNewComment={setNewComment}
+        addComment={addComment}
+        deleteComment={deleteComment}
+        showComments={showComments}
+        adjustTextareaHeight={adjustTextareaHeight}
+      />
     </div>
   );
 }

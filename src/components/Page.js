@@ -1,6 +1,6 @@
 'use client';
 
-export default function Page({ page, onTitleChange, onContentChange }) {
+export default function Page({ page, onTitleChange, onContentChange, textareaRef }) {
   if (!page) {
     return <div/>;
   }
@@ -10,12 +10,13 @@ export default function Page({ page, onTitleChange, onContentChange }) {
         type="text"
         value={page.title}
         onChange={onTitleChange}
-        className="text-3xl font-bold mb-4 w-full p-2 border border-transparent rounded-md focus:border-blue-500 focus:outline-none"
+        className="text-3xl font-bold mb-4 w-full p-2 border border-transparent rounded-md focus:border-gray-300 focus:outline-none"
       />
       <textarea
         value={page.content}
         onChange={onContentChange}
-        className="w-full h-64 p-2 border border-gray-300 rounded-md focus:border-blue-500 focus:outline-none"
+        ref={textareaRef}
+        className="w-full p-2 border border-transparent rounded-md focus:border-gray-300 focus:outline-none"
         placeholder="Start writing your note here..."
       />
     </div>

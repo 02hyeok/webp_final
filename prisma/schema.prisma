@@ -20,6 +20,7 @@ model User {
   pages         Page[]
   folders       Folder[]
   profileImage  String?
+  comments      Comment[]
 }
 
 model Folder {
@@ -29,6 +30,7 @@ model Folder {
   user          User        @relation(fields: [userId], references: [id])
   pages         Page[]
   createdAt     DateTime    @default(now())
+
 }
 
 model Page {
@@ -42,4 +44,16 @@ model Page {
   author        User        @relation(fields: [userId], references: [id])
   folderId      Int?
   folder        Folder?     @relation(fields: [folderId], references: [id])
+  comments      Comment[]
+}
+
+model Comment {
+  id            Int         @id @default(autoincrement())
+  content       String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  userId        Int
+  user          User        @relation(fields: [userId], references: [id]) 
+  pageId        Int
+  page          Page        @relation(fields: [pageId], references: [id])
 }
