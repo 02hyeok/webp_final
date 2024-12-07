@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '../components/Sidebar';
 import Page from '../components/Page';
 import CommentsSidebar from '../components/CommentsSidebar';
+import SearchPage from '../components/SearchPage';
 
 export default function Home() {
   const [pages, setPages] = useState([]);
@@ -16,6 +17,9 @@ export default function Home() {
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -44,7 +48,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (selectedPageId) {
+    if (selectedPageId && textareaRef.current) {
+      adjustTextareaHeight(textareaRef.current);
       fetchComments(selectedPageId, true);
     } else {
       setShowComments(false);
@@ -294,6 +299,58 @@ export default function Home() {
     }
   };
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const results = pages.map((page) => {
+      const lowerCaseContent = page.content.toLowerCase();
+      const lowerCaseQuery = query.toLowerCase();
+
+      const startIndex = lowerCaseContent.indexOf(lowerCaseQuery);
+
+      if (startIndex === -1) {
+        return null;
+      }
+
+      const snippetStart = Math.max(0, startIndex - 10); 
+      const snippetEnd = Math.min(page.content.length, startIndex + query.length + 10); 
+      const snippet = page.content.slice(snippetStart, snippetEnd);
+
+      const highlightedSnippet = snippet.replace(
+        new RegExp(`(${query})`, 'gi'), 
+        '<b>$1</b>' 
+      );
+
+      return {
+        id: page.id,
+        title: page.title,
+        snippet: `${snippetStart > 0 ? '...' : ''}${highlightedSnippet}${snippetEnd < page.content.length ? '...' : ''}`,
+      };
+    });
+
+    setSearchResults(results.filter((result) => result !== null));
+  };
+
+  const handleSearchToggle = (active) => {
+    if (active) {
+      setSearchQuery('');
+      setSearchResults([]);
+      setSearchActive(true); 
+    } else {
+      setSearchActive(false);
+    }
+  };
+
+  const handlePageSelection = (pageId) => {
+    setSelectedPageId(pageId); 
+    setSearchActive(false); 
+  };
+
   return (
     <div className="flex">
       <Sidebar
@@ -301,15 +358,23 @@ export default function Home() {
         pages={pages}
         folders={folders}
         selectedPageId={selectedPageId}
-        setSelectedPageId={setSelectedPageId}
+        setSelectedPageId={handlePageSelection}
         toggleFavorite={toggleFavorite}
         addNewPage={addNewPage}
         deletePage={deletePage}
         addFolder={addFolder}
         addPageToFolder={addPageToFolder}
+        setSearchActive={handleSearchToggle}
       />
       <div className="flex-grow p-5 transition-all ml-[30vw] mr-[30vw]">
-        {selectedPageId !== null && (
+        {searchActive ? (
+          <SearchPage
+          searchQuery={searchQuery}
+          onSearch={handleSearch}
+          searchResults={searchResults}
+          onSelectPage={handlePageSelection}
+          />
+        ) : selectedPageId !== null && (
           <Page
             page={pages.find((page) => page.id === selectedPageId)}
             onTitleChange={(e) => handleTitleChange(e)}

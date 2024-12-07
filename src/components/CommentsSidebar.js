@@ -49,7 +49,7 @@ export default function CommentsSidebar({
                   </p>
                 </div>
                 <button
-                  className="text-red-500 hover:underline"
+                  className="ml-1 text-xs font-bold text-red-500 hover:underline"
                   onClick={() => deleteComment(comment.id)}
                 >
                   Delete
