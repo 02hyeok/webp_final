@@ -6,6 +6,7 @@ import Sidebar from '../components/Sidebar';
 import Page from '../components/Page';
 import CommentsSidebar from '../components/CommentsSidebar';
 import SearchPage from '../components/SearchPage';
+import MusicSidebar from '../components/MusicSidebar';
 
 export default function Home() {
   const [pages, setPages] = useState([]);
@@ -20,6 +21,10 @@ export default function Home() {
   const [searchActive, setSearchActive] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showMusicSidebar, setShowMusicSidebar] = useState(false);
+  const [musicFiles, setMusicFiles] = useState([]);
+  const [isPlaying, setIsPlaying] = useState([]);
+  const audioRefs = useRef({});
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -239,10 +244,13 @@ export default function Home() {
     }
   };
 
-  const toggleComments = () => {
-    setShowComments(!showComments);
-    if (!showComments && selectedPageId) {
-      fetchComments(selectedPageId);
+  const handleToggleSidebar = (sidebar) => {
+    if (sidebar === 'comments') {
+      setShowComments((prev) => !prev);
+      if (showMusicSidebar) setShowMusicSidebar(false);
+    } else if (sidebar === 'music') {
+      setShowMusicSidebar((prev) => !prev);
+      if (showComments) setShowComments(false);
     }
   };
 
@@ -253,6 +261,7 @@ export default function Home() {
         const data = await res.json();
         setComments(data);
         if (autoOpen) {
+          setShowMusicSidebar(false);
           setShowComments(data.length > 0);
         }
       } else {
@@ -351,6 +360,57 @@ export default function Home() {
     setSearchActive(false); 
   };
 
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files);
+
+    const uploadedFiles = await Promise.all(
+      files.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch('/api/music', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!res.ok) {
+          console.error('Failed to upload file');
+          return null;
+        }
+
+        const { filePath, fileName } = await res.json();
+        return { name: fileName, path: filePath };
+      })
+    );
+
+    const validFiles = uploadedFiles.filter((file) => file !== null);
+    setMusicFiles([...musicFiles, ...validFiles]);
+    setIsPlaying([...isPlaying, ...validFiles.map(() => false)]);
+  };
+
+  const handlePlayPause = (index) => {
+    if (audioRefs.current[index]) {
+      if (isPlaying[index]) {
+        audioRefs.current[index].pause();
+      } else {
+        audioRefs.current[index].play();
+      }
+      setIsPlaying((prev) =>
+        prev.map((playing, i) => (i === index ? !playing : playing))
+      );
+    }
+  };
+
+  const handleReset = (index) => {
+    if (audioRefs.current[index]) {
+      audioRefs.current[index].currentTime = 0;
+      audioRefs.current[index].play();
+      setIsPlaying((prev) =>
+        prev.map((playing, i) => (i === index ? true : playing))
+      );
+    }
+  };
+
   return (
     <div className="flex">
       <Sidebar
@@ -385,7 +445,7 @@ export default function Home() {
       </div>
       <CommentsSidebar
         selectedPageId={selectedPageId}
-        toggleComments={toggleComments}
+        handleToggleSidebar={handleToggleSidebar}
         comments={comments}
         newComment={newComment}
         setNewComment={setNewComment}
@@ -393,6 +453,16 @@ export default function Home() {
         deleteComment={deleteComment}
         showComments={showComments}
         adjustTextareaHeight={adjustTextareaHeight}
+      />
+      <MusicSidebar
+        showMusicSidebar={showMusicSidebar}
+        handleToggleSidebar={handleToggleSidebar}
+        musicFiles={musicFiles}
+        isPlaying={isPlaying}
+        handleFileUpload={handleFileUpload}
+        handlePlayPause={handlePlayPause}
+        handleReset={handleReset}
+        audioRefs={audioRefs}
       />
     </div>
   );

@@ -2,7 +2,7 @@
 
 export default function CommentsSidebar({
   selectedPageId,
-  toggleComments,
+  handleToggleSidebar,
   comments,
   newComment,
   setNewComment,
@@ -21,13 +21,13 @@ export default function CommentsSidebar({
         xmlns="http://www.w3.org/2000/svg"
         className="fixed top-4 right-4 w-5 h-5 fill-current hover:bg-gray-200 cursor-pointer z-50"
         viewBox="0 0 24 24"
-        onClick={toggleComments}
+        onClick={() => handleToggleSidebar('comments')}
       >
         <path d="M20 2H4C2.9 2 2 2.9 2 4v10c0 1.1.9 2 2 2h3v4l4-4h9c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM4 4h16v10H8.83L7 16.83V14H4V4z"></path>
       </svg>
 
       {showComments && (
-        <div className="w-1/4 min-w-20 max-w-60 h-screen bg-gray-100 fixed right-0 top-0 border-l p-8">
+        <div className="w-1/4 min-w-20 max-w-60 h-screen bg-gray-100 fixed right-0 top-0 border-l pt-12 p-4">
           <h3 className="text-lg font-bold mb-4">Comments</h3>
           <div className="flex flex-col space-y-4">
             {comments.map((comment) => (
