@@ -19,7 +19,7 @@ export default function MusicSidebar({
     <>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="fixed top-4 right-10 w-5 h-5 fill-current hover:bg-gray-200 cursor-pointer z-50"
+        className="fixed top-4 right-12 w-6 h-6 fill-current hover:bg-gray-200 cursor-pointer z-50"
         viewBox="0 0 24 24"
         onClick={() => handleToggleSidebar('music')}
       >
@@ -54,7 +54,7 @@ export default function MusicSidebar({
                       {isPlaying[index] ? (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="w-5 h-5 text-blue-500 hover:text-blue-300 transition"
+                          className="w-6 h-6 text-blue-500 hover:text-blue-300 transition"
                           viewBox="0 0 24 24"
                         >
                           <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
@@ -62,7 +62,7 @@ export default function MusicSidebar({
                       ) : (
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="w-5 h-5 text-blue-500 hover:text-blue-300 transition"
+                          className="w-6 h-6 text-blue-500 hover:text-blue-300 transition"
                           viewBox="0 0 24 24"
                         >
                           <path d="M8 5v14l11-7z"></path>
@@ -75,7 +75,7 @@ export default function MusicSidebar({
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="w-5 h-5 text-black hover:text-gray-700 transition"
+                        className="w-6 h-6 text-black hover:text-gray-700 transition"
                         viewBox="0 0 24 24"
                       >
                         <path d="M12 6V3L8 7l4 4V8c2.76 0 5 2.24 5 5s-2.24 5-5 5a5.006 5.006 0 0 1-4.9-4h-2.02c.51 3.43 3.43 6 6.92 6 3.87 0 7-3.13 7-7s-3.13-7-7-7z"></path>

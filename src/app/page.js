@@ -63,6 +63,20 @@ export default function Home() {
     }
   }, [selectedPageId]);
 
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      if (res.ok) {
+        setUser(null);
+        router.push('/login');
+      } else {
+        console.error('Failed to log out:', await res.text());
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   const toggleFavorite = async (pageId, isFavorite) => {
     const res = await fetch('/api/pages/favorite', {
       method: 'POST',
@@ -435,6 +449,7 @@ export default function Home() {
         user={user}
         pages={pages}
         folders={folders}
+        handleLogout={handleLogout}
         selectedPageId={selectedPageId}
         setSelectedPageId={handlePageSelection}
         toggleFavorite={toggleFavorite}
@@ -443,6 +458,8 @@ export default function Home() {
         addFolder={addFolder}
         addPageToFolder={addPageToFolder}
         setSearchActive={handleSearchToggle}
+        setShowComments={setShowComments}
+        setShowMusicSidebar={setShowMusicSidebar}
       />
       <div className="flex-grow p-5 transition-all ml-[30vw] mr-[30vw]">
         {searchActive ? (

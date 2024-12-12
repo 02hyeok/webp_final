@@ -19,7 +19,7 @@ export default function CommentsSidebar({
     <>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className="fixed top-4 right-4 w-5 h-5 fill-current hover:bg-gray-200 cursor-pointer z-50"
+        className="fixed top-4 right-4 w-6 h-6 fill-current hover:bg-gray-200 cursor-pointer z-50"
         viewBox="0 0 24 24"
         onClick={() => handleToggleSidebar('comments')}
       >
@@ -33,10 +33,15 @@ export default function CommentsSidebar({
             {comments.map((comment) => (
               <div
                 key={comment.id}
-                className="flex justify-between items-center bg-white p-3 rounded shadow"
+                className="flex justify-between items-start bg-white p-3 rounded shadow"
               >
-                <div>
-                  <p className="text-sm text-gray-700">{comment.content}</p>
+                <div className="flex-grow">
+                  <p 
+                    className="text-sm text-gray-700 break-words"
+                    style={{ wordBreak: 'break-word' }}
+                  >
+                    {comment.content}
+                  </p>
                   <p className="text-xs text-gray-500">
                     {new Intl.DateTimeFormat('kr', {
                         year: 'numeric',
@@ -72,9 +77,6 @@ export default function CommentsSidebar({
               onClick={() => {
                 addComment(newComment);
                 setNewComment('');
-                if (textareaRef.current) {
-                  textareaRef.current.style.height = 'auto';
-                }
               }}
             >
               Submit
