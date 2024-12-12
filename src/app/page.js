@@ -42,11 +42,9 @@ export default function Home() {
           fetchPages(data.id);
           fetchFolder(data.id);
         } else {
-          console.error('Failed to fetch user info:', await res.text());
           router.push('/login');
         }
       } catch (error) {
-        console.error('Error fetching user info:', error);
         router.push('/login');
       }
     };
@@ -348,28 +346,31 @@ export default function Home() {
     }
 
     const results = pages.map((page) => {
+      const lowerCaseTitle = page.title.toLowerCase();
       const lowerCaseContent = page.content.toLowerCase();
       const lowerCaseQuery = query.toLowerCase();
 
-      const startIndex = lowerCaseContent.indexOf(lowerCaseQuery);
+      const titleIndex = lowerCaseTitle.indexOf(lowerCaseQuery);
+      const contentIndex = lowerCaseContent.indexOf(lowerCaseQuery);
 
-      if (startIndex === -1) {
+      let snippet = "";
+      if (titleIndex !== -1) {
+        snippet = page.content.slice(0, 30);
+      } else if (contentIndex !== -1) {
+        const snippetStart = Math.max(0, contentIndex - 10);
+        const snippetEnd = Math.min(page.content.length, contentIndex + query.length + 10);
+        snippet = page.content.slice(snippetStart, snippetEnd).replace(
+          new RegExp(`(${query})`, 'gi'),
+          '<b>$1</b>'
+        );
+      } else {
         return null;
       }
-
-      const snippetStart = Math.max(0, startIndex - 10); 
-      const snippetEnd = Math.min(page.content.length, startIndex + query.length + 10); 
-      const snippet = page.content.slice(snippetStart, snippetEnd);
-
-      const highlightedSnippet = snippet.replace(
-        new RegExp(`(${query})`, 'gi'), 
-        '<b>$1</b>' 
-      );
 
       return {
         id: page.id,
         title: page.title,
-        snippet: `${snippetStart > 0 ? '...' : ''}${highlightedSnippet}${snippetEnd < page.content.length ? '...' : ''}`,
+        snippet: snippet,
       };
     });
 
