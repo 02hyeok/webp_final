@@ -1,5 +1,5 @@
 # New Notion 
-Next.js를 사용하여 제작된 New Notion
+>Next.js를 사용하여 제작된 New Notion
 
 
 ## 설치 및 실행

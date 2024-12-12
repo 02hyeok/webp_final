@@ -495,6 +495,7 @@ export default function Home() {
             onTitleChange={(e) => handleTitleChange(e)}
             onContentChange={(e) => handleContentChange(e)}
             textareaRef={textareaRef}
+            folders={folders}
           />
         )}
       </div>

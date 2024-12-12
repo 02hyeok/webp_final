@@ -173,7 +173,7 @@ export default function Sidebar({
                 .map((page) => (
                   <div
                     key={page.id}
-                    className={`group flex items-center px-1 py-2 rounded-md ${selectedPageId === page.id ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
+                    className={`group flex items-center px-1 py-1 rounded-md ${selectedPageId === page.id ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
                     onClick={() => setSelectedPageId(page.id)}
                   >
                     <div className="w-5 flex justify-center items-center">
@@ -235,7 +235,7 @@ export default function Sidebar({
             .map((page) => (
               <div
                 key={page.id}
-                className={`group flex items-center px-1 py-2 rounded-md ${
+                className={`group flex items-center px-1 py-1 rounded-md ${
                   selectedPageId === page.id ? 'bg-gray-200' : 'hover:bg-gray-200'
                 }`}
                 onClick={() => setSelectedPageId(page.id)}
