@@ -56,8 +56,10 @@ export default function Home() {
     if (selectedPageId && textareaRef.current) {
       adjustTextareaHeight(textareaRef.current);
       fetchComments(selectedPageId, true);
+      fetchMusicFiles(selectedPageId);
     } else {
       setShowComments(false);
+      setMusicFiles([]);
     }
   }, [selectedPageId]);
 
@@ -360,6 +362,21 @@ export default function Home() {
     setSearchActive(false); 
   };
 
+  const fetchMusicFiles = async (pageId) => {
+    try {
+      const res = await fetch(`/api/music?pageId=${pageId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setMusicFiles(data);
+        setIsPlaying(data.map(() => false));
+      } else {
+        console.error('Failed to fetch music files:', await res.text());
+      }
+    } catch (error) {
+      console.error('Error fetching music files:', error);
+    }
+  };
+
   const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files);
 
@@ -367,6 +384,7 @@ export default function Home() {
       files.map(async (file) => {
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('pageId', selectedPageId);
 
         const res = await fetch('/api/music', {
           method: 'POST',
@@ -455,6 +473,7 @@ export default function Home() {
         adjustTextareaHeight={adjustTextareaHeight}
       />
       <MusicSidebar
+        selectedPageId={selectedPageId}
         showMusicSidebar={showMusicSidebar}
         handleToggleSidebar={handleToggleSidebar}
         musicFiles={musicFiles}

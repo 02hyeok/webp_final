@@ -1,6 +1,7 @@
 'use client';
 
 export default function MusicSidebar({
+  selectedPageId,
   showMusicSidebar,
   handleToggleSidebar,
   musicFiles,
@@ -10,6 +11,10 @@ export default function MusicSidebar({
   handleReset,
   audioRefs,
 }) {
+  if (!selectedPageId) {
+    return null;
+  }
+
   return (
     <>
       <svg
