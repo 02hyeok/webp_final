@@ -14,6 +14,11 @@ export default function Sidebar({
   addNewPage, 
   deletePage,
   addFolder,
+  isModalOpen,
+  setIsModalOpen, 
+  newFolderName,
+  setNewFolderName,
+  handleAddFolder,
   addPageToFolder,
   setSearchActive,
   setShowComments,
@@ -105,7 +110,7 @@ export default function Sidebar({
         </div>
         <div 
           className="flex items-center gap-2 px-1 py-2 rounded-md hover:bg-gray-200"
-          onClick={addFolder}>
+          onClick={() => setIsModalOpen(true)}>
           <svg 
             className="w-6 h-6 fill-gray-600" 
             viewBox="0 0 24 24"
@@ -114,6 +119,34 @@ export default function Sidebar({
           </svg>
           <span className="text-sm font-bold text-gray-600">Add Folder</span>
         </div>
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-md shadow-lg p-6 w-80">
+              <h2 className="text-lg font-bold mb-4">Create New Folder</h2>
+              <input
+                type="text"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                placeholder="Enter folder name"
+                className="w-full p-2 border rounded text-sm mb-4"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddFolder}
+                  className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col">

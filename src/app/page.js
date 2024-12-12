@@ -15,6 +15,8 @@ export default function Home() {
   const [selectedPageId, setSelectedPageId] = useState(null);
   const textareaRef = useRef(null);
   const [folders, setFolders] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
@@ -115,19 +117,32 @@ export default function Home() {
     }
   };
 
-  const addFolder = async () => {
-    const folderName = prompt('Enter folder name:');
-    if (!folderName) return;
+  const addFolder = async (folderName) => {
+    try {
+      const res = await fetch('/api/folders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: folderName, userId: user.id }),
+      });
+  
+      if (res.ok) {
+        const newFolder = await res.json();
+        setFolders((prevFolders) => [...prevFolders, newFolder]);
+      } else {
+        console.error('Failed to add folder:', await res.text());
+      }
+    } catch (error) {
+      console.error('Error adding folder:', error);
+    }
+  };
 
-    const res = await fetch('/api/folders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: folderName, userId: user.id }),
-    });
-
-    if (res.ok) {
-      const newFolder = await res.json();
-      setFolders([...folders, newFolder]);
+  const handleAddFolder = async () => {
+    if (newFolderName.trim()) {
+      await addFolder(newFolderName);
+      setNewFolderName("");
+      setIsModalOpen(false);
     }
   };
 
@@ -456,6 +471,11 @@ export default function Home() {
         addNewPage={addNewPage}
         deletePage={deletePage}
         addFolder={addFolder}
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        newFolderName={newFolderName}
+        setNewFolderName={setNewFolderName}
+        handleAddFolder={handleAddFolder}
         addPageToFolder={addPageToFolder}
         setSearchActive={handleSearchToggle}
         setShowComments={setShowComments}
