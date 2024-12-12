@@ -23,6 +23,9 @@ export default function Home() {
   const [searchActive, setSearchActive] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [highlightedTitle, setHighlightedTitle] = useState('');
+  const [highlightedContent, setHighlightedContent] = useState('');
+  const [isHighlighting, setIsHighlighting] = useState(false);
   const [showMusicSidebar, setShowMusicSidebar] = useState(false);
   const [musicFiles, setMusicFiles] = useState([]);
   const [isPlaying, setIsPlaying] = useState([]);
@@ -53,7 +56,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (selectedPageId && textareaRef.current) {
+    if ((selectedPageId && textareaRef.current) || (!isHighlighting && textareaRef.current)) {
       adjustTextareaHeight(textareaRef.current);
       fetchComments(selectedPageId, true);
       fetchMusicFiles(selectedPageId);
@@ -61,7 +64,7 @@ export default function Home() {
       setShowComments(false);
       setMusicFiles([]);
     }
-  }, [selectedPageId]);
+  }, [isHighlighting, selectedPageId]);
 
   const handleLogout = async () => {
     try {
@@ -387,8 +390,37 @@ export default function Home() {
     }
   };
 
-  const handlePageSelection = (pageId) => {
+  const handlePageSelection = (pageId, keyword = '') => {
     setSelectedPageId(pageId); 
+
+    if (keyword) {
+      const selectedPage = pages.find((page) => page.id === pageId);
+      const highlightedTitle = selectedPage.title.replace(
+        new RegExp(`(${keyword})`, 'gi'),
+        '<mark>$1</mark>'
+      );
+  
+      const highlightedContent = selectedPage.content.replace(
+        new RegExp(`(${keyword})`, 'gi'),
+        '<mark>$1</mark>'
+      );
+  
+      setHighlightedTitle(highlightedTitle);
+      setHighlightedContent(highlightedContent);
+      setIsHighlighting(true);
+  
+      setTimeout(() => {
+        setIsHighlighting(false);
+        setHighlightedTitle('');
+        setHighlightedContent('');
+        adjustTextareaHeight(textareaRef.current);
+      }, 3000);
+    } else {
+      setIsHighlighting(false);
+      setHighlightedTitle('');
+      setHighlightedContent('');
+    }
+
     setSearchActive(false); 
   };
 
@@ -488,7 +520,7 @@ export default function Home() {
           searchQuery={searchQuery}
           onSearch={handleSearch}
           searchResults={searchResults}
-          onSelectPage={handlePageSelection}
+          onSelectPage={(pageId) => handlePageSelection(pageId, searchQuery)}
           />
         ) : selectedPageId !== null && (
           <Page
@@ -497,6 +529,9 @@ export default function Home() {
             onContentChange={(e) => handleContentChange(e)}
             textareaRef={textareaRef}
             folders={folders}
+            highlightedTitle={highlightedTitle}
+            highlightedContent={highlightedContent}
+            isHighlighting={isHighlighting}
           />
         )}
       </div>

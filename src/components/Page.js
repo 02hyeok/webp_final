@@ -5,7 +5,10 @@ export default function Page({
   onTitleChange, 
   onContentChange, 
   textareaRef,
-  folders
+  folders,
+  highlightedTitle,
+  highlightedContent,
+  isHighlighting,
 }) {
   if (!page) {
     return <div/>;
@@ -32,19 +35,36 @@ export default function Page({
         </span>
       </div>
       
-      <input
-        type="text"
-        value={page.title}
-        onChange={onTitleChange}
-        className="text-3xl font-bold mb-4 w-full p-2 border border-transparent rounded-md focus:border-gray-300 focus:outline-none"
-      />
-      <textarea
-        value={page.content}
-        onChange={onContentChange}
-        ref={textareaRef}
-        className="w-full p-2 border border-transparent rounded-md focus:border-gray-300 focus:outline-none"
-        placeholder="Start writing your note here..."
-      />
+      <div className="text-3xl font-bold mb-4 w-full p-2">
+        {isHighlighting && highlightedTitle ? (
+          <span
+            className="highlighted-title"
+            dangerouslySetInnerHTML={{ __html: highlightedTitle }}
+          />
+        ) : (
+          <input
+            type="text"
+            value={page.title}
+            onChange={onTitleChange}
+            className="w-full border border-transparent rounded-md focus:border-gray-300 focus:outline-none"
+          />
+        )}
+      </div>
+
+      {isHighlighting  && highlightedContent ? (
+        <div
+          className="highlighted-content w-full p-2 border border-tr  ansparent rounded-md mb-4"
+          dangerouslySetInnerHTML={{ __html: highlightedContent }}
+        />
+      ) : (
+        <textarea
+          value={page.content}
+          onChange={onContentChange}
+          ref={textareaRef}
+          className="w-full p-2 border border-transparent rounded-md focus:border-gray-300 focus:outline-none"
+          placeholder="Start writing your note here..."
+        />
+      )}
     </div>
   );
 }

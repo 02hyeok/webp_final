@@ -156,8 +156,8 @@ export default function Sidebar({
             className="flex flex-col mt-4 mb-2"
           >
             <div className="flex items-center justify-between">
-              <div className="text-xs font-bold text-gray-400 p-2">{folder.name}</div>
-              <div className="p-2 opacity-0 hover:opacity-100">
+              <div className="text-xs font-bold text-gray-400 p-1">{folder.name}</div>
+              <div className="p-1 opacity-0 hover:opacity-100">
                 <svg 
                   className="w-6 h-6 fill-current hover:bg-gray-200" 
                   viewBox="0 0 24 24" 
@@ -228,7 +228,7 @@ export default function Sidebar({
           </div>
         ))}
         
-        <div className="text-xs font-bold text-gray-400 p-2 mt-4">Default</div>
+        <div className="text-xs font-bold text-gray-400 p-1 mt-4">Default</div>
         <div className="flex flex-col p-1">
           {pages
             .filter((page) => !page.folderId)
