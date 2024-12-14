@@ -6,7 +6,7 @@
 
 1. **`npm install`** (종속성 설치)
 
-2. **`npx prisma migrate dev —name init`** (Prisma migration 생성)
+2. **`npx prisma migrate dev --name init`** (Prisma migration 생성)
 
 3. **`npm run dev`** (개발 서버 실행)
 
